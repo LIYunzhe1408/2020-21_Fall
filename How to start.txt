@@ -1,0 +1,16 @@
+git config --global user.name "Jonas"
+git config --global user.email xxxxxx@xxxx.com
+git config --global init.default branch main
+git init
+
+
+
+add a file called ".gitignore"
+edit it with the following:
+	# ignore all .txt files
+	*.txt
+
+git add xxxx -> get all these files to be staging
+
+
+Then we can commit...
