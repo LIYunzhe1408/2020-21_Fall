@@ -14,3 +14,6 @@ git add xxxx -> get all these files to be staging
 
 
 Then we can commit...
+git log  -> to see all commit changes
+git commit -m "xxxxx" --amend -> rename the message
+git log -p  ->to see all diff

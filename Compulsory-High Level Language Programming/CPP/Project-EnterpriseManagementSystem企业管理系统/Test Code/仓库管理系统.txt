@@ -1,0 +1,419 @@
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+#include <math.h>
+#include <algorithm>
+#include <cmath>
+#include <exception>
+#include <string.h>
+#include <stdio.h>
+#include <sstream>
+#include <cstdio>
+#include <string>
+#include <fstream>
+
+using namespace std;
+int count[26] = { 0 };
+struct project   //定义一个结构体包含编号，名称以及数量三个部分
+{
+	char bian;
+	string name;
+	int number;
+	project* next;
+};
+project* CreateList(); //建立链表
+	/*cout << "输入初始仓储物品数量: ";
+	int n; cin >> n;
+	string line;
+	cout << "输入初始仓储: " << endl;
+	for (int i = 0; i < n; i++)//while (line != "")
+	{
+		p = new project;
+		//q = new project;
+		/*getline(cin, line);
+		stringstream ss(line);
+		//ss.str(line);
+		ss >> p->bian >> p->name >> p->number;
+		cout << "输入商品编号: ";cin >> p->bian;
+		cout << endl << "输入商品名: "; cin >> p->name;
+		cout << endl << "输入商品数量: "; cin >> p->number;
+		if (head == NULL)
+			head = p;
+		else
+		{
+			q->next = p;
+		}
+		q = p;
+	}*/
+void add(project* head);//加入新商品
+void out(project* head);//出库系统
+void manage(project* head);//仓库盘点系统
+void kill(project*& head);//删除清空的货物(只能删第一个)
+void save(project* head);//保存文件
+void in(project* head);//入库系统
+void list(project*& head);//排序系统
+int main()
+{
+	project* head;
+	head = CreateList();
+	printf("欢迎进入物流管理系统\n");
+	printf("请选择你要进行的操作\n1.物品入库\n2.物品出库\n3.仓库盘点\n4.添加商品\n5.全部清空\n");
+	save(head);
+	int a;
+	while (cin >> a)
+	{
+		if (a == 1)
+			in(head);
+		else if (a == 2)
+		{
+			out(head);
+			kill(head);
+			save(head);
+		}
+		else if (a == 3)
+			manage(head);
+		else if (a == 4)
+			add(head);
+		else if (a == 5)
+		{
+			cout << "请输入管理员密码: ";
+			string str;
+			cin >> str;
+			if (str == "1145141919810")
+			{
+				head = NULL;
+				save(head);
+				cout << "已删除" << endl;
+			}
+			else
+				cout << "输入错误" << endl;
+		}
+		//save(head);
+		else
+		{
+			printf("输入错误，请重新输入\n");
+			//continue;
+		}
+		//save(kill(head));
+		list(head);
+		printf("\n\n\n请选择你要进行的操作\n1.物品入库\n2.物品出库\n3.仓库盘点\n4.添加商品\n5.全部清空\n");
+	}
+	return 0;
+}
+project* CreateList()  //建立链表
+{
+	project* head = NULL, * p = NULL, * q = NULL;
+	
+	char filename[6] = { 'x' , '.' , 't' , 'x' , 't' , '\0' };
+	fstream fin;
+	fin.open(filename);//打开文件
+	string line;
+	if (fin.is_open()) cout << "*成功载入*" << endl;
+	else
+	{
+		cout << "载入失败" << endl;
+		return NULL;
+	}
+	while (getline(fin, line))
+	{
+		if (line == "")
+			break;
+		p = new project;//分配内存空间给p
+		stringstream ss(line);
+		ss >> p->bian >> p->name >> p->number;
+		if (p->bian >= 65 && p->bian <= 90)
+		{
+			p->bian += 32;
+		}
+		if (head == NULL)
+			head = p;
+		else
+		{
+			//q = head;
+			q->next = p;
+		}
+		q = p;//q指向当前最后一个节点
+	}
+	if (head != NULL)
+		q->next = NULL;
+	fin.clear();//清空fin
+	fin.close();//关闭文件
+	return head;//返回头指针
+}
+void add(project* head)//加入新商品
+{
+	int flag = 0;
+	project* p = NULL, * q = NULL;
+	p = head;
+	char ch;
+	cout << "输入新商品编号: "; 
+	cin >> ch;
+	if (ch >= 65 && ch <= 90)
+	{
+		ch += 32;
+	}
+	while (p != NULL)
+	{
+		if (p->bian == ch)
+		{
+			cout << "该编号已存在商品\n若要查看所有商品数据请输入1\n继续输入编号请输入2\n回到主界面请输入3\n";
+			flag = 1;
+			break;
+		}
+		p = p->next;
+	}
+	if (flag == 1)
+	{
+		int n;
+		cin >> n;
+		if (n == 1)
+			manage(head);
+		else if (n == 2)
+			add(head);
+		else if (n == 3)
+			return;
+	}
+	if (flag == 0)
+	{
+		q = new project;
+		//cout << "输入商品编号: "; cin >> q->bian;
+		q->bian = ch;
+		cout << "输入商品名: "; cin >> q->name;
+		cout << "输入商品数量: "; cin >> q->number;
+		//q->next = NULL;
+		while (q->number <= 0)
+		{
+			cout << "请输入正确的商品数：";
+			cin >> q->number;
+		}
+		if (head == NULL)
+			head = q;
+		else
+		{
+			p = head;
+			while (p->next != NULL)
+			{
+				p = p->next;
+			}
+			p->next = q;
+			q->next = NULL;
+			cout << "入库成功"<<endl;
+		}
+		save(head);
+	}
+}
+void in(project* head)//入库系统
+{
+	char ch;
+	int flag = 0;
+	project* p = NULL;
+	p = head;
+	cout << "输入商品编号: "; cin >> ch;
+	if (ch >= 65 && ch <= 90)
+	{
+		ch += 32;
+	}
+	while (p != NULL)
+	{
+		if (p->bian == ch)
+		{
+			flag = 1;
+			break;
+		}
+		p = p->next;
+	}
+	if (flag == 0)
+	{
+		cout << "该商品不存在\n若要查看所有商品数据请输入1\n继续输入编号请输入2\n回到主界面请输入3\n";
+		int n;
+		cin >> n;
+		if (n == 1)
+			manage(head);
+		else if (n == 2)
+			add(head);
+		else if (n == 3)
+			return;
+	}
+	else if (flag == 1)
+	{
+		int n;
+		cout << "请输入该商品入库数量: ";
+		cin >> n; 
+		while (n <= 0)
+		{
+			cout << "请输入正确的商品数：";
+			cin >> n;
+		}
+		p->number += n;
+		save(head);
+		cout << "商品已入库";
+	}
+}
+void out(project* head)//出库系统
+{
+	char ch;
+	int flag = 0;
+	project* p = NULL;
+	project* q = NULL;
+	p = head;
+	cout << "输入商品编号: "; cin >> ch;
+	if (ch >= 65 && ch <= 90)
+	{
+		ch += 32;
+	}
+	while (p != NULL)
+	{
+		q = p;
+		if (p->bian == ch)
+		{
+			flag = 1;
+			break;
+		}
+		p = p->next;
+	}
+	if (flag == 0)
+	{
+		cout << "该商品不存在\n若要查看所有商品数据请输入1\n继续输入编号请输入2\n回到主界面请输入3\n";
+		int n;
+		cin >> n;
+		if (n == 1)
+			manage(head);
+		else if (n == 2)
+			add(head);
+		else if (n == 3)
+			return;
+	}
+	else if (flag == 1)
+	{
+		int n;
+		cout << "请输入该商品出库数量: ";
+		cin >> n;
+		if (n>p->number)
+			cout << "已超过该商品库存数量\n若要重新重新输入数量请输入1\n查看库存数量输入编号2\n回到主界面请输入3\n" ;
+		while (n > p->number)
+		{
+			int a;
+			cin >> a;
+			if (a == 1)
+			{
+				cout << "请输入该商品出库数量: ";
+				cin >> n;
+			}
+			else if (a == 2)
+			{
+				cout << p->bian << " " << p->name << " " << p->number << endl << endl << endl;
+				cout << "若要重新重新输入数量请输入1\n查看库存数量输入编号2\n回到主界面请输入3\n" << endl;
+			}
+			else if (a == 3)
+				return;
+		}
+		p->number -= n;
+		//if (p->number == 0)
+			//kill(head);
+		cout << "商品已出库";
+	}
+}
+void manage(project* head)//仓库盘点系统
+{
+	project* p = NULL;
+	p = head;
+	if (head == NULL)
+		cout << "无商品" << endl;
+	while (p != NULL)
+	{
+		cout << p->bian << " " << p->name << " " << p->number << endl;
+		p = p->next;
+	}
+}
+void kill(project*& head)//删除清空的货物(只能删第一个)
+{
+	project* p = NULL, * q = NULL;
+	p = head;
+	if (head->number == 0)
+	{
+		if (head->next != NULL)
+		{   
+			head = head->next;
+			//cout << head->number << endl;
+			delete p;
+			
+		}
+		else
+		{
+			delete head;
+			head = NULL;
+			cout << "无商品" << endl;
+			//return;
+		}
+		//return head;
+	}
+	else
+	{
+		while (p->next != NULL)
+		{
+			q = p->next;
+			if (q->number == 0)
+			{
+				p->next = q->next;
+				delete q;
+			}
+			else
+				p = q;
+
+		}
+	}
+	//save(head);
+}
+void save(project* head)//保存文件
+{
+	kill(head);
+	list(head);
+	project* p = NULL, * q = NULL;
+	char filename[6] = { 'x','.','t','x','t','\0' };
+	ofstream fout;
+	fout.open(filename, ios::trunc);
+	p = head;
+	while (p != NULL)
+	{
+		fout << p->bian << " " << p->name << " " << p->number << endl;
+		p = p->next;
+	}
+	fout.clear();
+	fout.close();
+}
+void list(project*& head)
+{
+	if (head == NULL)
+		return;
+	project* p = NULL, * q = NULL, * rua = NULL;
+	p = head;
+	int flag = 1;
+	while (flag == 1)
+	{
+		flag = 0;
+		while (p!=NULL)
+		{
+			q = p -> next;
+			if (q == NULL)
+				break;
+			if (p->bian > q->bian)
+			{
+				if (p == head)
+				{
+					q->next = p;
+					head = q;
+					p->next =p->next->next;
+				}
+				else
+				{
+					rua -> next = q;
+					p -> next = q -> next;
+					q -> next = p;
+				}
+				flag = 1;
+			}
+			rua = p;
+			p = p->next;
+		}
+	}
+}
